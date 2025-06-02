@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>單價比較工具</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background-color: #f4f4f4;
+    }
+
+    .container {
+      display: flex;
+      justify-content: space-between;
+      gap: 40px;
+    }
+
+    .product {
+      flex: 1;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .product h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .input-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
+
+    .button-container {
+      text-align: center;
+      margin: 30px 0;
+    }
+
+    button {
+      padding: 10px 30px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .result {
+      text-align: center;
+      font-size: 18px;
+      margin-top: 20px;
+    }
+
+    .cheaper {
+      color: green;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1 style="text-align:center;">商品單價比較工具</h1>
+
+  <div class="container">
+    <div class="product" id="productA">
+      <h2>商品 A</h2>
+      <div class="input-group">
+        <label for="priceA">總價格</label>
+        <input type="number" id="priceA" placeholder="例如：100">
+      </div>
+      <div class="input-group">
+        <label for="quantityA">數量</label>
+        <input type="number" id="quantityA" placeholder="例如：5">
+      </div>
+      <div class="result" id="resultA"></div>
+    </div>
+
+    <div class="product" id="productB">
+      <h2>商品 B</h2>
+      <div class="input-group">
+        <label for="priceB">總價格</label>
+        <input type="number" id="priceB" placeholder="例如：90">
+      </div>
+      <div class="input-group">
+        <label for="quantityB">數量</label>
+        <input type="number" id="quantityB" placeholder="例如：4">
+      </div>
+      <div class="result" id="resultB"></div>
+    </div>
+  </div>
+
+  <div class="button-container">
+    <button onclick="comparePrices()">比較</button>
+  </div>
+
+  <script>
+    function comparePrices() {
+      const priceA = parseFloat(document.getElementById('priceA').value);
+      const quantityA = parseFloat(document.getElementById('quantityA').value);
+      const priceB = parseFloat(document.getElementById('priceB').value);
+      const quantityB = parseFloat(document.getElementById('quantityB').value);
+
+      const resultA = document.getElementById('resultA');
+      const resultB = document.getElementById('resultB');
+
+      // 清除樣式
+      resultA.classList.remove("cheaper");
+      resultB.classList.remove("cheaper");
+
+      if (isNaN(priceA) || isNaN(quantityA) || quantityA === 0 ||
+          isNaN(priceB) || isNaN(quantityB) || quantityB === 0) {
+        alert("請輸入有效的價格與數量（且數量不可為 0）");
+        return;
+      }
+
+      const unitPriceA = priceA / quantityA;
+      const unitPriceB = priceB / quantityB;
+
+      // 顯示結果
+      resultA.textContent = `單價：${unitPriceA.toFixed(2)} 元`;
+      resultB.textContent = `單價：${unitPriceB.toFixed(2)} 元`;
+
+      if (unitPriceA < unitPriceB) {
+        resultA.classList.add("cheaper");
+      } else if (unitPriceB < unitPriceA) {
+        resultB.classList.add("cheaper");
+      } else {
+        // 相同價格，皆不標示綠色
+      }
+    }
+  </script>
+</body>
+</html>
