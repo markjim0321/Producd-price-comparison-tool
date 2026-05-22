@@ -2,164 +2,578 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>單價比較工具</title>
+  <title>單價比較</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg: #f5f3ef;
+      --surface: #ffffff;
+      --border: #e2ddd8;
+      --text: #1a1814;
+      --muted: #8a857e;
+      --green-bg: #d4f0df;
+      --green-border: #27ae60;
+      --green-text: #155c33;
+      --red-bg: #fad8d8;
+      --red-border: #e74c3c;
+      --red-text: #7a1f1f;
+      --amber: #e6a817;
+      --mono: 'DM Mono', monospace;
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background-color: #f4f4f4;
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-
-    .container {
+      font-family: 'Noto Sans TC', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
       display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      gap: 20px;
+      flex-direction: column;
+      padding-bottom: 64px;
     }
 
-    .product {
-      flex: 1;
-      background-color: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    .product h2 {
+    header {
+      padding: 20px 20px 12px;
       text-align: center;
-      margin-bottom: 20px;
+      flex-shrink: 0;
     }
 
-    .input-group {
-      margin-bottom: 18px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 6px;
-      font-weight: bold;
-    }
-
-    input[type="number"] {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      box-sizing: border-box;
-      font-size: 16px;
-    }
-
-    .button-container {
-      text-align: center;
-      margin: 30px 0;
-    }
-
-    button {
-      padding: 12px 30px;
+    header h1 {
       font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    header p {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    /* ── PAGES ── */
+    .page { display: flex; flex-direction: column; flex: 1; padding: 0 12px; }
+    .page.hidden { display: none; }
+
+    /* ══ SIMPLE MODE ══ */
+    .simple-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .simple-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 12px;
+      display: flex;
+      flex-direction: column;
+      transition: background 0.25s, border-color 0.25s;
+    }
+
+    .simple-card.winner {
+      background: var(--green-bg);
+      border-color: var(--green-border);
+    }
+
+    .simple-card.loser {
+      background: var(--red-bg);
+      border-color: var(--red-border);
+    }
+
+    .card-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .simple-card.winner .card-label { color: var(--green-text); }
+    .simple-card.loser  .card-label { color: var(--red-text); }
+
+    .field-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 3px;
+    }
+
+    .simple-card input,
+    .simple-card select {
+      width: 100%;
+      font-family: var(--mono);
+      font-size: 15px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 10px;
+      background: rgba(255,255,255,0.7);
+      color: var(--text);
+      margin-bottom: 9px;
+      -moz-appearance: textfield;
+    }
+
+    .simple-card input::-webkit-outer-spin-button,
+    .simple-card input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    .simple-card input:focus,
+    .simple-card select:focus { outline: none; border-color: var(--text); }
+
+    .simple-result {
+      margin-top: auto;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      min-height: 58px;
+    }
+
+    .simple-card.winner .simple-result { border-color: var(--green-border); }
+    .simple-card.loser  .simple-result { border-color: var(--red-border); }
+
+    .unit-price {
+      font-family: var(--mono);
+      font-size: 19px;
+      font-weight: 500;
+      line-height: 1.2;
+    }
+
+    .per100 {
+      font-size: 11px;
+      color: var(--muted);
+      font-family: var(--mono);
+      margin-top: 3px;
+    }
+
+    .simple-card.winner .unit-price { color: var(--green-text); }
+    .simple-card.loser  .unit-price { color: var(--red-text); }
+    .simple-card.winner .per100 { color: var(--green-text); opacity: 0.7; }
+    .simple-card.loser  .per100 { color: var(--red-text); opacity: 0.7; }
+
+    .result-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 9px;
+      border-radius: 20px;
+      margin-top: 6px;
+      letter-spacing: 0.03em;
+    }
+
+    .badge-green { background: var(--green-border); color: #fff; }
+    .badge-red   { background: var(--red-border);   color: #fff; }
+    .badge-tie   { background: var(--amber);         color: #fff; }
+
+    /* ══ MULTI MODE ══ */
+    .multi-toolbar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-add {
+      background: var(--text);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 16px;
+      font-size: 13px;
+      font-family: 'Noto Sans TC', sans-serif;
+      font-weight: 500;
       cursor: pointer;
     }
 
-    .result {
-      text-align: center;
-      font-size: 18px;
-      margin-top: 15px;
+    .btn-clear {
+      background: var(--surface);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 16px;
+      font-size: 13px;
+      font-family: 'Noto Sans TC', sans-serif;
+      cursor: pointer;
     }
 
-    .cheaper {
-      color: green;
-      font-weight: bold;
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      overflow-x: auto;
     }
 
-    /* ✅ 手機響應式設計 */
-    @media (max-width: 768px) {
-      .container {
-        flex-direction: column;
-      }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 420px;
+    }
 
-      .product {
-        margin-bottom: 20px;
-      }
+    thead th {
+      background: var(--bg);
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 10px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
 
-      button {
-        width: 80%;
-        max-width: 300px;
-      }
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.2s;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+
+    tbody tr.winner { background: var(--green-bg); }
+    tbody tr.loser  { background: var(--red-bg); }
+
+    tbody td {
+      padding: 7px 10px;
+      vertical-align: middle;
+    }
+
+    tbody td input,
+    tbody td select {
+      width: 100%;
+      font-family: var(--mono);
+      font-size: 13px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 8px;
+      background: rgba(255,255,255,0.6);
+      color: var(--text);
+      -moz-appearance: textfield;
+    }
+
+    tbody td input::-webkit-outer-spin-button,
+    tbody td input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    tbody td input:focus,
+    tbody td select:focus { outline: none; border-color: var(--text); }
+
+    .col-name  { min-width: 72px; }
+    .col-price { min-width: 64px; }
+    .col-qty   { min-width: 56px; }
+    .col-unit  { min-width: 80px; }
+    .col-up    { min-width: 80px; font-family: var(--mono); font-size: 13px; white-space: nowrap; }
+    .col-rank  { min-width: 40px; text-align: center; }
+    .col-del   { width: 30px; text-align: center; }
+
+    .winner .col-up { color: var(--green-text); font-weight: 500; }
+    .loser  .col-up { color: var(--red-text);   font-weight: 500; }
+
+    .rank-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .rank-1 { background: #f5c518; color: #5a4200; }
+    .rank-2 { background: #c0c8d0; color: #3a3a3a; }
+    .rank-3 { background: #d4a97a; color: #5a3800; }
+    .rank-n { background: var(--border); color: var(--muted); }
+
+    .del-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 17px;
+      padding: 2px 4px;
+      line-height: 1;
+    }
+
+    .del-btn:hover { color: var(--red-border); }
+
+    /* ── BOTTOM TABS ── */
+    .bottom-tabs {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      z-index: 100;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 13px 0 15px;
+      border: none;
+      background: none;
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      transition: color 0.2s;
+      position: relative;
+    }
+
+    .tab-btn.active { color: var(--text); }
+
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 20%; right: 20%;
+      height: 2px;
+      background: var(--text);
+      border-radius: 0 0 2px 2px;
     }
   </style>
 </head>
 <body>
 
-  <h1>商品單價比較工具</h1>
+<header>
+  <h1>單價比較</h1>
+  <p id="header-sub">輸入兩樣商品，即時比較划算程度</p>
+</header>
 
-  <div class="container">
-    <div class="product" id="productA">
-      <h2>商品 A</h2>
-      <div class="input-group">
-        <label for="priceA">總價格</label>
-        <input type="number" id="priceA" placeholder="例如：100">
-      </div>
-      <div class="input-group">
-        <label for="quantityA">數量</label>
-        <input type="number" id="quantityA" placeholder="例如：5">
-      </div>
-      <div class="result" id="resultA"></div>
+<!-- SIMPLE MODE -->
+<div class="page" id="simple-mode">
+  <div class="simple-grid">
+
+    <div class="simple-card" id="sc-A">
+      <div class="card-label">商品 A</div>
+      <div class="field-label">價格（元）</div>
+      <input type="number" id="s-priceA" min="0" placeholder="99" oninput="simpleCompare()">
+      <div class="field-label">數量</div>
+      <input type="number" id="s-qtyA" min="0" placeholder="500" oninput="simpleCompare()">
+      <div class="field-label">單位</div>
+      <select id="s-unitA" onchange="simpleCompare()">
+        <option value="0">件／個</option>
+        <option value="1">克 (g)</option>
+        <option value="2">毫升 (ml)</option>
+        <option value="3">公斤 (kg)</option>
+        <option value="4">公升 (L)</option>
+      </select>
+      <div class="simple-result" id="s-resA"></div>
     </div>
 
-    <div class="product" id="productB">
-      <h2>商品 B</h2>
-      <div class="input-group">
-        <label for="priceB">總價格</label>
-        <input type="number" id="priceB" placeholder="例如：90">
-      </div>
-      <div class="input-group">
-        <label for="quantityB">數量</label>
-        <input type="number" id="quantityB" placeholder="例如：4">
-      </div>
-      <div class="result" id="resultB"></div>
+    <div class="simple-card" id="sc-B">
+      <div class="card-label">商品 B</div>
+      <div class="field-label">價格（元）</div>
+      <input type="number" id="s-priceB" min="0" placeholder="99" oninput="simpleCompare()">
+      <div class="field-label">數量</div>
+      <input type="number" id="s-qtyB" min="0" placeholder="500" oninput="simpleCompare()">
+      <div class="field-label">單位</div>
+      <select id="s-unitB" onchange="simpleCompare()">
+        <option value="0">件／個</option>
+        <option value="1">克 (g)</option>
+        <option value="2">毫升 (ml)</option>
+        <option value="3">公斤 (kg)</option>
+        <option value="4">公升 (L)</option>
+      </select>
+      <div class="simple-result" id="s-resB"></div>
     </div>
+
   </div>
+</div>
 
-  <div class="button-container">
-    <button onclick="comparePrices()">比較</button>
+<!-- MULTI MODE -->
+<div class="page hidden" id="multi-mode">
+  <div class="multi-toolbar">
+    <button class="btn-add" onclick="multiAdd()">＋ 新增商品</button>
+    <button class="btn-clear" onclick="multiClear()">清除全部</button>
   </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="col-name">名稱</th>
+          <th class="col-price">價格</th>
+          <th class="col-qty">數量</th>
+          <th class="col-unit">單位</th>
+          <th class="col-up">單價</th>
+          <th class="col-rank">排名</th>
+          <th class="col-del"></th>
+        </tr>
+      </thead>
+      <tbody id="multi-tbody"></tbody>
+    </table>
+  </div>
+</div>
 
-  <script>
-    function comparePrices() {
-      const priceA = parseFloat(document.getElementById('priceA').value);
-      const quantityA = parseFloat(document.getElementById('quantityA').value);
-      const priceB = parseFloat(document.getElementById('priceB').value);
-      const quantityB = parseFloat(document.getElementById('quantityB').value);
+<!-- BOTTOM TABS -->
+<div class="bottom-tabs">
+  <button class="tab-btn active" id="tab-simple" onclick="switchTab('simple')">簡單</button>
+  <button class="tab-btn" id="tab-multi" onclick="switchTab('multi')">多項</button>
+</div>
 
-      const resultA = document.getElementById('resultA');
-      const resultB = document.getElementById('resultB');
+<script>
+  const UNITS = [
+    { label: '件／個', per: null, short: '件' },
+    { label: '克 (g)',  per: 100,  short: 'g'  },
+    { label: '毫升 (ml)', per: 100, short: 'ml' },
+    { label: '公斤 (kg)', per: 1000, short: 'kg' },
+    { label: '公升 (L)', per: 1000, short: 'L'  },
+  ];
 
-      resultA.classList.remove("cheaper");
-      resultB.classList.remove("cheaper");
+  function switchTab(mode) {
+    document.getElementById('simple-mode').classList.toggle('hidden', mode !== 'simple');
+    document.getElementById('multi-mode').classList.toggle('hidden', mode !== 'multi');
+    document.getElementById('tab-simple').classList.toggle('active', mode === 'simple');
+    document.getElementById('tab-multi').classList.toggle('active', mode === 'multi');
+    document.getElementById('header-sub').textContent =
+      mode === 'simple' ? '輸入兩樣商品，即時比較划算程度' : '比較多項商品，一表看出排名';
+  }
 
-      if (isNaN(priceA) || isNaN(quantityA) || quantityA === 0 ||
-          isNaN(priceB) || isNaN(quantityB) || quantityB === 0) {
-        alert("請輸入有效的價格與數量（且數量不可為 0）");
+  /* ── SIMPLE ── */
+  function simpleCompare() {
+    const sides = ['A','B'];
+    const vals = sides.map(s => {
+      const price = parseFloat(document.getElementById('s-price'+s).value);
+      const qty   = parseFloat(document.getElementById('s-qty'+s).value);
+      const uIdx  = parseInt(document.getElementById('s-unit'+s).value);
+      const u     = UNITS[uIdx];
+      if (!isNaN(price) && !isNaN(qty) && qty > 0 && price >= 0)
+        return { valid: true, unitPrice: price/qty, per100: u.per ? (u.per/qty)*price : null, u };
+      return { valid: false };
+    });
+
+    const bothValid = vals[0].valid && vals[1].valid;
+    const tie = bothValid && vals[0].unitPrice === vals[1].unitPrice;
+
+    sides.forEach((s, i) => {
+      const card = document.getElementById('sc-'+s);
+      const res  = document.getElementById('s-res'+s);
+      card.classList.remove('winner','loser');
+      const v = vals[i];
+      if (!v.valid) { res.innerHTML = ''; return; }
+
+      let badge = '';
+      if (bothValid) {
+        if (tie) {
+          badge = '<span class="result-badge badge-tie">價格相同</span>';
+        } else if (v.unitPrice < vals[1-i].unitPrice) {
+          card.classList.add('winner');
+          badge = '<span class="result-badge badge-green">最划算 ✓</span>';
+        } else {
+          card.classList.add('loser');
+          badge = '<span class="result-badge badge-red">較貴</span>';
+        }
+      }
+
+      const per100Html = v.per100 !== null
+        ? `<div class="per100">每 ${v.u.per}${v.u.short}：${v.per100.toFixed(2)} 元</div>` : '';
+
+      res.innerHTML = `
+        <div class="unit-price">${v.unitPrice.toFixed(3)}<span style="font-size:11px;opacity:0.7"> 元/${v.u.short}</span></div>
+        ${per100Html}${badge}
+      `;
+    });
+  }
+
+  /* ── MULTI ── */
+  let multiRows = [
+    { id: 1, name: '商品 A' },
+    { id: 2, name: '商品 B' },
+    { id: 3, name: '商品 C' },
+  ];
+  let nextMultiId = 4;
+
+  function renderMulti() {
+    const tbody = document.getElementById('multi-tbody');
+    tbody.innerHTML = '';
+    multiRows.forEach(r => {
+      const tr = document.createElement('tr');
+      tr.id = 'mrow-' + r.id;
+      tr.innerHTML = `
+        <td class="col-name"><input type="text" value="${r.name}" onchange="updateMultiName(${r.id},this.value)" style="font-family:'Noto Sans TC',sans-serif;font-size:13px"></td>
+        <td class="col-price"><input type="number" id="m-price-${r.id}" min="0" placeholder="0" oninput="multiCompare()"></td>
+        <td class="col-qty"><input type="number" id="m-qty-${r.id}" min="0" placeholder="0" oninput="multiCompare()"></td>
+        <td class="col-unit">
+          <select id="m-unit-${r.id}" onchange="multiCompare()">
+            ${UNITS.map((u,i)=>`<option value="${i}">${u.label}</option>`).join('')}
+          </select>
+        </td>
+        <td class="col-up" id="m-up-${r.id}">—</td>
+        <td class="col-rank" id="m-rank-${r.id}"><span class="rank-badge rank-n">—</span></td>
+        <td class="col-del">${multiRows.length > 2 ? `<button class="del-btn" onclick="multiRemove(${r.id})">×</button>` : ''}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function updateMultiName(id, val) {
+    multiRows.find(r => r.id === id).name = val;
+  }
+
+  function multiCompare() {
+    const results = multiRows.map(r => {
+      const price = parseFloat(document.getElementById('m-price-'+r.id)?.value);
+      const qty   = parseFloat(document.getElementById('m-qty-'+r.id)?.value);
+      const uIdx  = parseInt(document.getElementById('m-unit-'+r.id)?.value ?? 0);
+      const u     = UNITS[uIdx];
+      if (!isNaN(price) && !isNaN(qty) && qty > 0 && price >= 0)
+        return { id: r.id, valid: true, unitPrice: price/qty, per100: u.per?(u.per/qty)*price:null, u };
+      return { id: r.id, valid: false };
+    });
+
+    const valid = results.filter(r => r.valid).sort((a,b) => a.unitPrice - b.unitPrice);
+
+    results.forEach(r => {
+      const upCell   = document.getElementById('m-up-'+r.id);
+      const rankCell = document.getElementById('m-rank-'+r.id);
+      const row      = document.getElementById('mrow-'+r.id);
+      row.classList.remove('winner','loser');
+
+      if (!r.valid) {
+        upCell.textContent = '—';
+        rankCell.innerHTML = '<span class="rank-badge rank-n">—</span>';
         return;
       }
 
-      const unitPriceA = priceA / quantityA;
-      const unitPriceB = priceB / quantityB;
+      const rankPos = valid.findIndex(v => v.id === r.id) + 1;
+      const note = r.per100 !== null
+        ? `<div style="font-size:10px;opacity:0.65">/100${r.u.short}: ${r.per100.toFixed(1)}</div>` : '';
+      upCell.innerHTML = `${r.unitPrice.toFixed(3)} 元/${r.u.short}${note}`;
 
-      resultA.textContent = `單價：${unitPriceA.toFixed(2)} 元`;
-      resultB.textContent = `單價：${unitPriceB.toFixed(2)} 元`;
+      const cls = rankPos===1?'rank-1':rankPos===2?'rank-2':rankPos===3?'rank-3':'rank-n';
+      rankCell.innerHTML = `<span class="rank-badge ${cls}">${rankPos}</span>`;
 
-      if (unitPriceA < unitPriceB) {
-        resultA.classList.add("cheaper");
-      } else if (unitPriceB < unitPriceA) {
-        resultB.classList.add("cheaper");
+      if (valid.length > 1) {
+        if (rankPos === 1) row.classList.add('winner');
+        else row.classList.add('loser');
       }
-    }
-  </script>
+    });
+  }
+
+  function multiAdd() {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    multiRows.push({ id: nextMultiId, name: '商品 ' + (letters[nextMultiId-1] || nextMultiId) });
+    nextMultiId++;
+    renderMulti();
+    multiCompare();
+  }
+
+  function multiRemove(id) {
+    if (multiRows.length <= 2) return;
+    multiRows = multiRows.filter(r => r.id !== id);
+    renderMulti();
+    multiCompare();
+  }
+
+  function multiClear() {
+    document.querySelectorAll('#multi-tbody input[type=number]').forEach(i => i.value = '');
+    multiCompare();
+  }
+
+  renderMulti();
+</script>
 </body>
 </html>
+
