@@ -253,7 +253,6 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 13px;
-      min-width: 400px;
     }
 
     thead th {
@@ -293,7 +292,15 @@
     tbody td input::-webkit-inner-spin-button { -webkit-appearance: none; }
     tbody td input:focus, tbody td select:focus { outline: none; border-color: #1a1814; }
 
-    .col-name  { min-width: 68px; }
+    .col-letter { width: 32px; text-align: center; }
+    .letter-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: #e2ddd8; color: #1a1814;
+      font-size: 13px; font-weight: 700;
+    }
+    .winner .letter-badge { background: var(--green-dark); color: white; }
+    .loser  .letter-badge { background: #e74c3c; color: white; }
     .col-price { min-width: 60px; }
     .col-qty   { min-width: 56px; }
     .col-unit  { min-width: 78px; }
@@ -430,7 +437,7 @@
     <table>
       <thead>
         <tr>
-          <th class="col-name">名稱</th>
+          <th class="col-letter"></th>
           <th class="col-price">價格</th>
           <th class="col-qty">數量</th>
           <th class="col-unit">單位</th>
@@ -554,11 +561,12 @@
   function renderMulti() {
     const tbody = document.getElementById('multi-tbody');
     tbody.innerHTML = '';
-    multiRows.forEach(r => {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    multiRows.forEach((r, idx) => {
       const tr = document.createElement('tr');
       tr.id = 'mrow-' + r.id;
       tr.innerHTML = `
-        <td class="col-name"><input type="text" value="${r.name}" onchange="updateMultiName(${r.id},this.value)" style="font-family:'Noto Sans TC',sans-serif;font-size:13px"></td>
+        <td class="col-letter"><span class="letter-badge">${letters[idx] || idx+1}</span></td>
         <td class="col-price"><input type="number" id="m-price-${r.id}" min="0" placeholder="0" oninput="multiCompare()"></td>
         <td class="col-qty"><input type="number" id="m-qty-${r.id}" min="0" placeholder="0" oninput="multiCompare()"></td>
         <td class="col-unit">
