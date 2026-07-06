@@ -2,8 +2,14 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>單價比較</title>
+  <title>PricePilot</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="theme-color" content="#4cd472">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="PricePilot">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icon-192.png">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -12,25 +18,90 @@
       --red: #e8645a;
       --red-dark: #c0392b;
       --neutral: #f5f3ef;
+      --ink: #1a1814;
+      --muted: #7c756d;
+      --line: #e2ddd8;
       --mono: 'DM Mono', monospace;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     html, body {
-      height: 100%;
+      min-height: 100%;
       font-family: 'Noto Sans TC', sans-serif;
-      overflow: hidden;
+      background: var(--neutral);
     }
 
     body {
       display: flex;
       flex-direction: column;
-      background: var(--neutral);
+      min-height: 100vh;
     }
 
     /* ── PAGES ── */
-    .page { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+    .brand-header {
+      padding: 12px 16px 10px;
+      background: var(--neutral);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand-kicker {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .brand-title {
+      color: var(--ink);
+      font-size: 25px;
+      line-height: 1;
+      margin-top: 2px;
+    }
+
+    .brand-subtitle {
+      color: #4c473f;
+      font-size: 13px;
+      line-height: 1.35;
+      margin-top: 5px;
+    }
+
+    .install-card {
+      display: none;
+      margin: 8px 12px 0;
+      padding: 8px 10px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(226,221,216,0.9);
+      border-radius: 7px;
+      color: var(--ink);
+    }
+
+    .install-card.show { display: block; }
+
+    .install-card-title {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .install-card-text {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+      margin-top: 2px;
+    }
+
+    .install-card .actions {
+      margin-top: 7px;
+    }
+
+    .install-card .btn-primary {
+      min-height: 34px;
+      padding: 7px 10px;
+      font-size: 13px;
+    }
+
+    .page { display: flex; flex-direction: column; flex: 1; }
     .page.hidden { display: none !important; }
 
     /* ══ SIMPLE MODE ══ */
@@ -38,7 +109,6 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
     }
 
     .split-wrap {
@@ -46,7 +116,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       position: relative;
-      overflow: hidden;
+      min-height: clamp(360px, calc(100vh - 300px), 470px);
     }
 
     .side {
@@ -54,10 +124,9 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      padding: 16px 8px 20px;
+      padding: 14px 8px 18px;
       gap: 8px;
       transition: background 0.3s;
-      overflow: hidden;
       min-width: 0;
     }
 
@@ -115,6 +184,7 @@
       color: white;
       font-weight: 500;
       text-align: center;
+      min-height: 22px;
     }
 
     /* inputs */
@@ -130,7 +200,7 @@
       color: rgba(255,255,255,0.85);
       white-space: nowrap;
       font-weight: 500;
-      width: 32px;
+      width: 38px;
     }
 
     .input-row input {
@@ -145,6 +215,11 @@
       -moz-appearance: textfield;
       appearance: textfield;
       min-width: 0;
+    }
+
+    .input-row.name-row input {
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 16px;
     }
 
     .input-row input::-webkit-outer-spin-button,
@@ -167,6 +242,63 @@
     }
 
     .unit-select option { color: #1a1814; background: white; }
+
+    .result-panel {
+      background: white;
+      border-top: 1px solid var(--line);
+      padding: 11px 14px 12px;
+    }
+
+    .result-title {
+      color: var(--ink);
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.35;
+      min-height: 21px;
+    }
+
+    .result-detail {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+      margin-top: 3px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 9px;
+    }
+
+    .btn-primary,
+    .btn-secondary,
+    .btn-add,
+    .btn-clear {
+      min-height: 44px;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+      border-radius: 8px;
+      padding: 10px 13px;
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      flex: 1;
+      background: var(--ink);
+      color: white;
+      border: none;
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--muted);
+      border: 1px solid var(--line);
+    }
 
     /* middle circle badge */
     .mid-badge {
@@ -207,7 +339,6 @@
       flex-direction: column;
       padding: 12px;
       gap: 12px;
-      overflow-y: auto;
     }
 
     .multi-toolbar {
@@ -222,7 +353,7 @@
       color: #fff;
       border: none;
       border-radius: 8px;
-      padding: 11px 18px;
+      padding: 11px 16px;
       font-size: 15px;
       font-family: 'Noto Sans TC', sans-serif;
       font-weight: 500;
@@ -234,7 +365,7 @@
       color: #8a857e;
       border: 1px solid #e2ddd8;
       border-radius: 8px;
-      padding: 11px 18px;
+      padding: 11px 16px;
       font-size: 15px;
       font-family: 'Noto Sans TC', sans-serif;
       cursor: pointer;
@@ -244,7 +375,6 @@
       background: white;
       border: 1px solid #e2ddd8;
       border-radius: 14px;
-      overflow: hidden;
       overflow-x: auto;
       flex-shrink: 0;
     }
@@ -301,11 +431,12 @@
     }
     .winner .letter-badge { background: var(--green-dark); color: white; }
     .loser  .letter-badge { background: #e74c3c; color: white; }
-    .col-price { min-width: 60px; }
+    .col-name  { min-width: 112px; }
+    .col-price { min-width: 68px; }
     .col-qty   { min-width: 56px; }
     .col-unit  { min-width: 78px; }
-    .col-up    { min-width: 80px; font-family: var(--mono); font-size: 12px; white-space: nowrap; }
-    .col-rank  { min-width: 40px; text-align: center; }
+    .col-up    { min-width: 84px; font-family: var(--mono); font-size: 12px; white-space: nowrap; }
+    .col-rank  { min-width: 70px; text-align: center; }
     .col-del   { width: 28px; text-align: center; }
 
     .winner .col-up { color: #155c33; font-weight: 500; }
@@ -313,8 +444,10 @@
 
     .rank-badge {
       display: inline-flex; align-items: center; justify-content: center;
-      width: 24px; height: 24px; border-radius: 50%;
+      min-width: 24px; height: 24px; border-radius: 999px;
+      padding: 0 8px;
       font-size: 12px; font-weight: 700;
+      white-space: nowrap;
     }
     .rank-1 { background: #f5c518; color: #5a4200; }
     .rank-2 { background: #c0c8d0; color: #3a3a3a; }
@@ -327,6 +460,110 @@
     }
     .del-btn:hover { color: #e74c3c; }
 
+    .history {
+      margin: 0;
+      padding: 0 12px 68px;
+      background: var(--neutral);
+      border-top: 1px solid var(--line);
+    }
+
+    .history-summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 45px;
+      color: var(--ink);
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .history-summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .history-title {
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .history-count {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .history[open] .history-summary {
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 8px;
+    }
+
+    .history-tools {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 8px;
+    }
+
+    .history-tools .btn-secondary {
+      min-height: 34px;
+      padding: 7px 10px;
+      font-size: 13px;
+    }
+
+    .history-list {
+      display: grid;
+      gap: 8px;
+      padding-bottom: 10px;
+    }
+
+    .history-empty,
+    .history-item {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .history-empty {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .history-item-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .history-item-detail {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 11px;
+      line-height: 1.5;
+      margin-top: 6px;
+      white-space: pre-line;
+    }
+
+    .toast {
+      position: fixed;
+      left: 16px;
+      right: 16px;
+      bottom: 72px;
+      z-index: 20;
+      display: none;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: rgba(26,24,20,0.92);
+      color: white;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .toast.show { display: block; }
+
     /* ── BOTTOM TABS ── */
     .bottom-tabs {
       background: white;
@@ -334,6 +571,11 @@
       display: flex;
       flex-shrink: 0;
       padding-bottom: env(safe-area-inset-bottom);
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 15;
     }
 
     .tab-btn {
@@ -356,9 +598,57 @@
       height: 2px; background: #1a1814;
       border-radius: 0 0 2px 2px;
     }
+
+    @media (min-width: 720px) {
+      body {
+        max-width: 720px;
+        margin: 0 auto;
+        border-left: 1px solid var(--line);
+        border-right: 1px solid var(--line);
+      }
+
+      .bottom-tabs {
+        left: 50%;
+        right: auto;
+        width: min(720px, 100%);
+        transform: translateX(-50%);
+      }
+    }
+
+    @media (max-width: 390px) {
+      .brand-title { font-size: 23px; }
+      .brand-subtitle { font-size: 12px; }
+      .split-wrap { min-height: clamp(380px, calc(100vh - 285px), 500px); }
+      .circle-wrap,
+      .circle-svg {
+        width: 76px;
+        height: 76px;
+      }
+      .circle-pct { font-size: 19px; }
+      .input-row {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .input-row label { width: auto; font-size: 13px; }
+    }
   </style>
 </head>
 <body>
+
+<header class="brand-header">
+  <div class="brand-kicker">Unit price comparer</div>
+  <h1 class="brand-title">PricePilot</h1>
+  <p class="brand-subtitle">智慧單價比較，幫你快速找出最划算的選擇</p>
+</header>
+
+<section class="install-card" id="install-card">
+  <div class="install-card-title">把 PricePilot 加到主畫面</div>
+  <p class="install-card-text" id="install-text">Android 可直接安裝；iPhone 可使用 Safari 分享按鈕，選擇「加入主畫面」。</p>
+  <div class="actions" id="install-actions">
+    <button class="btn-primary" id="install-btn" type="button">安裝 PricePilot</button>
+  </div>
+</section>
 
 <!-- SIMPLE MODE -->
 <div class="page" id="simple-mode">
@@ -376,6 +666,10 @@
         </div>
       </div>
       <div class="unit-price-display" id="up-a">—</div>
+      <div class="input-row name-row">
+        <label>名稱</label>
+        <input type="text" id="nameA" placeholder="商品 A" oninput="simpleCompare()">
+      </div>
       <div class="input-row">
         <label>價格</label>
         <input type="number" id="priceA" min="0" placeholder="0" oninput="simpleCompare()">
@@ -405,6 +699,10 @@
         </div>
       </div>
       <div class="unit-price-display" id="up-b">—</div>
+      <div class="input-row name-row">
+        <label>名稱</label>
+        <input type="text" id="nameB" placeholder="商品 B" oninput="simpleCompare()">
+      </div>
       <div class="input-row">
         <label>價格</label>
         <input type="number" id="priceB" min="0" placeholder="0" oninput="simpleCompare()">
@@ -425,6 +723,13 @@
 
 
   </div>
+  <section class="result-panel">
+    <div class="result-title" id="simple-result-title">輸入價格與數量後，立即比較哪個更划算</div>
+    <div class="result-detail" id="simple-result-detail">支援件、克、毫升、公斤與公升。</div>
+    <div class="actions">
+      <button class="btn-primary" onclick="shareResult()">分享結果</button>
+    </div>
+  </section>
 </div>
 
 <!-- MULTI MODE -->
@@ -438,6 +743,7 @@
       <thead>
         <tr>
           <th class="col-letter"></th>
+          <th class="col-name">商品名稱</th>
           <th class="col-price">價格</th>
           <th class="col-qty">數量</th>
           <th class="col-unit">單位</th>
@@ -449,7 +755,27 @@
       <tbody id="multi-tbody"></tbody>
     </table>
   </div>
+  <section class="result-panel">
+    <div class="result-title" id="multi-result-title">輸入兩項以上商品後，會自動排出最划算選擇</div>
+    <div class="result-detail" id="multi-result-detail">第一名會標示為最划算。</div>
+    <div class="actions">
+      <button class="btn-primary" onclick="shareResult()">分享結果</button>
+    </div>
+  </section>
 </div>
+
+<details class="history" id="history-section">
+  <summary class="history-summary">
+    <span class="history-title">最近比較紀錄</span>
+    <span class="history-count" id="history-count">0 筆</span>
+  </summary>
+  <div class="history-tools">
+    <button class="btn-secondary" onclick="clearHistory()" type="button">清除紀錄</button>
+  </div>
+  <div class="history-list" id="history-list"></div>
+</details>
+
+<div class="toast" id="toast"></div>
 
 <!-- BOTTOM TABS -->
 <div class="bottom-tabs">
@@ -467,18 +793,212 @@
   ];
 
   const CIRC = 2 * Math.PI * 46;
+  const HISTORY_KEY = 'pricepilot-history-v1';
+  let lastComparison = null;
+  let lastHistorySignature = '';
+  let historyTimer = null;
+  let deferredInstallPrompt = null;
 
   function switchTab(mode) {
     document.getElementById('simple-mode').classList.toggle('hidden', mode !== 'simple');
     document.getElementById('multi-mode').classList.toggle('hidden', mode !== 'multi');
     document.getElementById('tab-simple').classList.toggle('active', mode === 'simple');
     document.getElementById('tab-multi').classList.toggle('active', mode === 'multi');
+    if (mode === 'simple') simpleCompare();
+    if (mode === 'multi') multiCompare();
   }
 
   function setCircle(fgId, pct) {
     const fg = document.getElementById(fgId);
     const offset = CIRC - (pct / 100) * CIRC;
     fg.style.strokeDashoffset = offset;
+  }
+
+  function getSimpleName(letter) {
+    const value = document.getElementById('name' + letter).value.trim();
+    return value || letter;
+  }
+
+  function fallbackName(value, idx) {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    return (value || '').trim() || (letters[idx] || String(idx + 1));
+  }
+
+  function formatUnitPrice(unitPrice, unit) {
+    return unitPrice.toFixed(3) + ' 元/' + unit.short;
+  }
+
+  function formatTime(timestamp) {
+    return new Date(timestamp).toLocaleString('zh-TW', {
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, char => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;'
+    }[char]));
+  }
+
+  function escapeAttr(value) {
+    return escapeHtml(value);
+  }
+
+  function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    window.clearTimeout(showToast.timer);
+    showToast.timer = window.setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+
+  function getHistory() {
+    try {
+      return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+    } catch {
+      return [];
+    }
+  }
+
+  function setHistory(items) {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(items.slice(0, 5)));
+    renderHistory();
+  }
+
+  function scheduleHistorySave(comparison) {
+    const signature = JSON.stringify({
+      mode: comparison.mode,
+      items: comparison.items.map(item => [item.name, item.unitPrice.toFixed(3), item.rank])
+    });
+    if (signature === lastHistorySignature) return;
+
+    window.clearTimeout(historyTimer);
+    historyTimer = window.setTimeout(() => {
+      const history = getHistory();
+      setHistory([{ ...comparison, createdAt: Date.now() }, ...history].slice(0, 5));
+      lastHistorySignature = signature;
+    }, 650);
+  }
+
+  function renderHistory() {
+    const list = document.getElementById('history-list');
+    const count = document.getElementById('history-count');
+    const history = getHistory();
+    if (count) count.textContent = `${history.length} 筆`;
+
+    if (!history.length) {
+      list.innerHTML = '<div class="history-empty">完成比較後，這裡會保留最近 5 筆紀錄。</div>';
+      return;
+    }
+
+    list.innerHTML = history.map(record => {
+      const topItems = record.items
+        .slice()
+        .sort((a, b) => a.rank - b.rank)
+        .map(item => `${item.rank}. ${item.name} ${item.unitPriceText}`)
+        .join('\n');
+      return `
+        <article class="history-item">
+          <div class="history-item-top">
+            <span>${escapeHtml(record.title)}</span>
+            <time>${formatTime(record.createdAt)}</time>
+          </div>
+          <div class="history-item-detail">${escapeHtml(topItems)}</div>
+        </article>
+      `;
+    }).join('');
+  }
+
+  function clearHistory() {
+    localStorage.removeItem(HISTORY_KEY);
+    lastHistorySignature = '';
+    renderHistory();
+    showToast('已清除最近比較紀錄');
+  }
+
+  function buildShareText(comparison) {
+    if (!comparison) return '';
+    const lines = [
+      'PricePilot 比較結果',
+      comparison.title,
+      ''
+    ];
+    comparison.items
+      .slice()
+      .sort((a, b) => a.rank - b.rank)
+      .forEach(item => {
+        lines.push(`${item.rank}. ${item.name}：${item.unitPriceText}${item.rank === 1 ? '（最划算）' : ''}`);
+      });
+    return lines.join('\n');
+  }
+
+  async function shareResult() {
+    if (!lastComparison) {
+      showToast('請先完成一組比較');
+      return;
+    }
+
+    const text = buildShareText(lastComparison);
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'PricePilot 比較結果', text });
+        return;
+      }
+      await navigator.clipboard.writeText(text);
+      showToast('瀏覽器不支援直接分享，已複製結果');
+    } catch {
+    showToast('分享未完成，請再試一次');
+    }
+  }
+
+  function isStandaloneApp() {
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  }
+
+  function setupInstallPrompt() {
+    const card = document.getElementById('install-card');
+    const text = document.getElementById('install-text');
+    const actions = document.getElementById('install-actions');
+    const button = document.getElementById('install-btn');
+
+    if (isStandaloneApp()) return;
+
+    card.classList.add('show');
+    actions.style.display = 'none';
+
+    window.addEventListener('beforeinstallprompt', event => {
+      event.preventDefault();
+      deferredInstallPrompt = event;
+      text.textContent = '可以把 PricePilot 安裝到手機主畫面，之後像 App 一樣開啟。';
+      actions.style.display = 'flex';
+    });
+
+    button.addEventListener('click', async () => {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+      actions.style.display = 'none';
+    });
+
+    window.addEventListener('appinstalled', () => {
+      card.classList.remove('show');
+      showToast('PricePilot 已加入主畫面');
+    });
+  }
+
+  function registerServiceWorker() {
+    if (!('serviceWorker' in navigator)) return;
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    });
   }
 
   function simpleCompare() {
@@ -489,11 +1009,14 @@
       const uIdx  = parseInt(document.getElementById('unit'+s).value);
       const u     = UNITS[uIdx];
       if (!isNaN(price) && !isNaN(qty) && qty > 0 && price > 0)
-        return { valid: true, unitPrice: price/qty, u };
+        return { valid: true, unitPrice: price/qty, u, name: getSimpleName(s) };
       return { valid: false };
     });
 
     const bothValid = vals[0].valid && vals[1].valid;
+    const titleEl = document.getElementById('simple-result-title');
+    const detailEl = document.getElementById('simple-result-detail');
+    lastComparison = null;
 
     // reset
     ['a','b'].forEach(s => {
@@ -509,23 +1032,40 @@
       const s = i === 0 ? 'a' : 'b';
       const u = UNITS[parseInt(document.getElementById('unit' + (i===0?'A':'B')).value)];
       if (!v.valid) return;
-      document.getElementById('up-'+s).textContent = v.unitPrice.toFixed(3) + ' 元/' + u.short;
+      document.getElementById('up-'+s).textContent = formatUnitPrice(v.unitPrice, u);
     });
 
-    if (!bothValid) return;
+    if (!bothValid) {
+      titleEl.textContent = '輸入價格與數量後，立即比較哪個更划算';
+      detailEl.textContent = '支援件、克、毫升、公斤與公升。';
+      return;
+    }
 
     const upA = vals[0].unitPrice;
     const upB = vals[1].unitPrice;
     const tie = upA === upB;
+    const nameA = vals[0].name;
+    const nameB = vals[1].name;
 
     if (tie) {
       document.getElementById('pct-a').textContent = '=';
       document.getElementById('pct-b').textContent = '=';
       document.getElementById('lbl-a').textContent = '相同';
       document.getElementById('lbl-b').textContent = '相同';
+      titleEl.textContent = `${nameA} 和 ${nameB} 單價相同`;
+      detailEl.textContent = `${nameA}：${formatUnitPrice(upA, vals[0].u)}，${nameB}：${formatUnitPrice(upB, vals[1].u)}`;
 
       setCircle('fg-a', 100);
       setCircle('fg-b', 100);
+      lastComparison = {
+        mode: 'simple',
+        title: `${nameA} 和 ${nameB} 單價相同`,
+        items: [
+          { name: nameA, unitPrice: upA, unitPriceText: formatUnitPrice(upA, vals[0].u), rank: 1 },
+          { name: nameB, unitPrice: upB, unitPriceText: formatUnitPrice(upB, vals[1].u), rank: 1 }
+        ]
+      };
+      scheduleHistorySave(lastComparison);
       return;
     }
 
@@ -547,16 +1087,54 @@
     setCircle('fg-'+winner, 100);
     setCircle('fg-'+loser, fillPct);
 
+    const winnerIdx = winner === 'a' ? 0 : 1;
+    const loserIdx = loser === 'a' ? 0 : 1;
+    const winnerName = vals[winnerIdx].name;
+    const loserName = vals[loserIdx].name;
+    titleEl.textContent = `${winnerName} 比 ${loserName} 便宜 ${diffPct}%`;
+    detailEl.textContent = `${loserName} 比 ${winnerName} 貴 ${diffPct}%`;
+    lastComparison = {
+      mode: 'simple',
+      title: `${winnerName} 比 ${loserName} 便宜 ${diffPct}%`,
+      items: [
+        {
+          name: winnerName,
+          unitPrice: vals[winnerIdx].unitPrice,
+          unitPriceText: formatUnitPrice(vals[winnerIdx].unitPrice, vals[winnerIdx].u),
+          rank: 1
+        },
+        {
+          name: loserName,
+          unitPrice: vals[loserIdx].unitPrice,
+          unitPriceText: formatUnitPrice(vals[loserIdx].unitPrice, vals[loserIdx].u),
+          rank: 2
+        }
+      ]
+    };
+    scheduleHistorySave(lastComparison);
 
   }
 
   /* ── MULTI ── */
   let multiRows = [
-    { id: 1, name: '商品 A' },
-    { id: 2, name: '商品 B' },
-    { id: 3, name: '商品 C' },
+    { id: 1, name: '' },
+    { id: 2, name: '' },
+    { id: 3, name: '' },
   ];
   let nextMultiId = 4;
+
+  function captureMultiInputs() {
+    multiRows.forEach(r => {
+      const name = document.getElementById('m-name-' + r.id);
+      const price = document.getElementById('m-price-' + r.id);
+      const qty = document.getElementById('m-qty-' + r.id);
+      const unit = document.getElementById('m-unit-' + r.id);
+      if (name) r.name = name.value;
+      if (price) r.price = price.value;
+      if (qty) r.qty = qty.value;
+      if (unit) r.unitIdx = unit.value;
+    });
+  }
 
   function renderMulti() {
     const tbody = document.getElementById('multi-tbody');
@@ -567,11 +1145,12 @@
       tr.id = 'mrow-' + r.id;
       tr.innerHTML = `
         <td class="col-letter"><span class="letter-badge">${letters[idx] || idx+1}</span></td>
-        <td class="col-price"><input type="number" id="m-price-${r.id}" min="0" placeholder="0" oninput="multiCompare()"></td>
-        <td class="col-qty"><input type="number" id="m-qty-${r.id}" min="0" placeholder="0" oninput="multiCompare()"></td>
+        <td class="col-name"><input type="text" id="m-name-${r.id}" value="${escapeAttr(r.name || '')}" placeholder="商品 ${letters[idx] || idx+1}" oninput="updateMultiName(${r.id}, this.value); multiCompare()"></td>
+        <td class="col-price"><input type="number" id="m-price-${r.id}" min="0" placeholder="0" value="${escapeAttr(r.price || '')}" oninput="multiCompare()"></td>
+        <td class="col-qty"><input type="number" id="m-qty-${r.id}" min="0" placeholder="0" value="${escapeAttr(r.qty || '')}" oninput="multiCompare()"></td>
         <td class="col-unit">
           <select id="m-unit-${r.id}" onchange="multiCompare()">
-            ${UNITS.map((u,i)=>`<option value="${i}">${u.label}</option>`).join('')}
+            ${UNITS.map((u,i)=>`<option value="${i}" ${String(r.unitIdx ?? 0) === String(i) ? 'selected' : ''}>${u.label}</option>`).join('')}
           </select>
         </td>
         <td class="col-up" id="m-up-${r.id}">—</td>
@@ -582,20 +1161,27 @@
     });
   }
 
-  function updateMultiName(id, val) { multiRows.find(r => r.id === id).name = val; }
+  function updateMultiName(id, val) {
+    const row = multiRows.find(r => r.id === id);
+    if (row) row.name = val;
+  }
 
   function multiCompare() {
-    const results = multiRows.map(r => {
+    captureMultiInputs();
+    const results = multiRows.map((r, idx) => {
       const price = parseFloat(document.getElementById('m-price-'+r.id)?.value);
       const qty   = parseFloat(document.getElementById('m-qty-'+r.id)?.value);
       const uIdx  = parseInt(document.getElementById('m-unit-'+r.id)?.value ?? 0);
       const u     = UNITS[uIdx];
       if (!isNaN(price) && !isNaN(qty) && qty > 0 && price > 0)
-        return { id: r.id, valid: true, unitPrice: price/qty, u };
-      return { id: r.id, valid: false };
+        return { id: r.id, valid: true, unitPrice: price/qty, u, name: fallbackName(r.name, idx) };
+      return { id: r.id, valid: false, name: fallbackName(r.name, idx) };
     });
 
     const valid = results.filter(r => r.valid).sort((a,b) => a.unitPrice - b.unitPrice);
+    const titleEl = document.getElementById('multi-result-title');
+    const detailEl = document.getElementById('multi-result-detail');
+    lastComparison = null;
 
     results.forEach(r => {
       const upCell   = document.getElementById('m-up-'+r.id);
@@ -610,36 +1196,70 @@
       }
 
       const rankPos = valid.findIndex(v => v.id === r.id) + 1;
-      upCell.innerHTML = `${r.unitPrice.toFixed(3)} 元/${r.u.short}`;
+      upCell.textContent = formatUnitPrice(r.unitPrice, r.u);
       const cls = rankPos===1?'rank-1':rankPos===2?'rank-2':rankPos===3?'rank-3':'rank-n';
-      rankCell.innerHTML = `<span class="rank-badge ${cls}">${rankPos}</span>`;
+      rankCell.innerHTML = `<span class="rank-badge ${cls}">${rankPos === 1 ? '最划算' : rankPos}</span>`;
       if (valid.length > 1) {
         if (rankPos === 1) row.classList.add('winner');
         else row.classList.add('loser');
       }
     });
+
+    if (valid.length < 2) {
+      titleEl.textContent = '輸入兩項以上商品後，會自動排出最划算選擇';
+      detailEl.textContent = '第一名會標示為最划算。';
+      return;
+    }
+
+    const rankedItems = valid.map((item, idx) => ({
+      name: item.name,
+      unitPrice: item.unitPrice,
+      unitPriceText: formatUnitPrice(item.unitPrice, item.u),
+      rank: idx + 1
+    }));
+    const best = rankedItems[0];
+    const second = rankedItems[1];
+    const diffPct = Math.round((second.unitPrice - best.unitPrice) / second.unitPrice * 100);
+    titleEl.textContent = `${best.name} 最划算，比第 2 名便宜 ${diffPct}%`;
+    detailEl.textContent = rankedItems.map(item => `${item.rank}. ${item.name} ${item.unitPriceText}`).join('　');
+    lastComparison = {
+      mode: 'multi',
+      title: `${best.name} 最划算`,
+      items: rankedItems
+    };
+    scheduleHistorySave(lastComparison);
   }
 
   function multiAdd() {
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    multiRows.push({ id: nextMultiId, name: '商品 ' + (letters[nextMultiId-1] || nextMultiId) });
+    captureMultiInputs();
+    multiRows.push({ id: nextMultiId, name: '' });
     nextMultiId++;
     renderMulti();
+    multiCompare();
   }
 
   function multiRemove(id) {
     if (multiRows.length <= 2) return;
+    captureMultiInputs();
     multiRows = multiRows.filter(r => r.id !== id);
     renderMulti();
     multiCompare();
   }
 
   function multiClear() {
-    document.querySelectorAll('#multi-tbody input[type=number]').forEach(i => i.value = '');
+    document.querySelectorAll('#multi-tbody input').forEach(i => i.value = '');
+    multiRows.forEach(r => {
+      r.name = '';
+      r.price = '';
+      r.qty = '';
+    });
     multiCompare();
   }
 
   renderMulti();
+  renderHistory();
+  setupInstallPrompt();
+  registerServiceWorker();
 </script>
 </body>
 </html>
